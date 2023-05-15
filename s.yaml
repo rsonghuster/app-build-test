@@ -170,3 +170,22 @@ services:
         handler: main
         memorySize: 128
         timeout: 60
+
+  cc-node14:
+    component: fc 
+    actions: 
+      pre-deploy: 
+        - component: fc build --use-docker --dockerfile ./custom-container-event-nodejs14/code/Dockerfile 
+    props:
+      region: ${vars.region} # 关于变量的使用方法，可以参考：https://www.serverless-devs.com/serverless-devs/yaml#变量赋值
+      service: ${vars.service}
+      function:
+        name: "custom-nodejs14-event-function"
+        description: 'hello world by serverless devs'
+        caPort: 9000
+        memorySize: 256
+        timeout: 60
+        runtime: custom-container
+        customContainerConfig:
+          image: "registry.cn-beijing.aliyuncs.com/xiliu-test/fc-node14:v1"
+        codeUri: ./custom-container-event-nodejs14/code
