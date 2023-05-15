@@ -1,0 +1,172 @@
+edition: 1.0.0
+name: web-framework-app
+access: 'default'
+
+vars: 
+  region: 'cn-beijing'
+  service:
+    name: 'test-app-build'
+    description: 'Serverless Devs test app build Service'
+
+services:
+  springboot: 
+    component: fc
+    actions: 
+      pre-deploy: 
+        - run: mvn package -DskipTests 
+          path: ./start-springboot/code
+    props: # 组件的属性值
+      region: ${vars.region} # 关于变量的使用方法，可以参考：https://www.serverless-devs.com/serverless-devs/yaml#变量赋值
+      service: ${vars.service}
+      function:
+        name: 'springboot'
+        description: 'Serverless Devs Web Framework Function'
+        codeUri: ./start-springboot/code
+        runtime: custom
+        memorySize: 1024
+        timeout: 30
+        instanceConcurrency: 100
+        customRuntimeConfig:
+          command:
+            - ./bootstrap
+      triggers:
+        - name: httpTrigger
+          type: http
+          config:
+            authType: anonymous
+            methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - HEAD
+              - OPTIONS
+      customDomains:
+        - domainName: auto
+          protocol: HTTP
+          routeConfigs:
+            - path: /*
+
+  flask: 
+    component: fc 
+    actions: 
+      pre-deploy:
+        - run: ([ -d "python" ] || mkdir python) && pip install -r requirements.txt -t ./python
+          path: ./start-flask/code 
+    props: 
+      region: ${vars.region}
+      service: ${vars.service}
+      function:
+        name: "flask"
+        description: 'Serverless Devs Web Framework Function'
+        codeUri: './start-flask/code'
+        runtime: python3.9
+        handler: index.app
+        timeout: 60
+        environmentVariables:
+          PYTHONPATH: /code/python
+      triggers:
+        - name: httpTrigger
+          type: http
+          config:
+            authType: anonymous
+            methods:
+              - GET
+      customDomains:
+        - domainName: auto
+          protocol: HTTP
+          routeConfigs:
+            - path: '/*'
+
+  php72: 
+    component: fc 
+    actions: 
+      pre-deploy:
+        - run: composer install
+          path: ./start-fc-event-php7/code 
+        - run: if [ $(uname) == "Linux" ]; then apt-get update; fi;
+          path: ./start-fc-event-php7/code
+        - run: if [ $(uname) == "Linux" ]; then apt-get install -y git; fi;
+          path: ./start-fc-event-php7/code
+    props:
+      region: ${vars.region} 
+      service: ${vars.service}
+      function:
+        name: "start-fc-event-php7"
+        description: 'hello world by serverless devs'
+        runtime: php7.2
+        codeUri: ./start-fc-event-php7/code
+        handler: index.handler
+        memorySize: 128
+        timeout: 60
+
+  java8: 
+    component: fc 
+    actions: 
+      pre-deploy: 
+        - run: mvn package -DskipTests 
+          path: ./start-fc-event-java8/
+    props:
+      region: ${vars.region} 
+      service: ${vars.service}
+      function:
+        name: "start-fc-event-java8"
+        description: 'hello world by serverless devs'
+        runtime: java8
+        codeUri: ./start-fc-event-java8/target/HelloFCJava-1.0-SNAPSHOT-jar-with-dependencies.jar
+        handler: example.App::handleRequest
+        memorySize: 128
+        timeout: 60
+        initializationTimeout: 60
+        initializer: example.App::initialize
+
+  express: 
+    component: fc 
+    actions: 
+      pre-deploy: 
+        - run: npm install --production 
+          path: ./start-express/code 
+    props: 
+      region: ${vars.region} 
+      service: ${vars.service}
+      function:
+        name:  express
+        description: 'Serverless Devs Web Framework Function'
+        codeUri: './start-express/code'
+        runtime: custom
+        timeout: 60
+        caPort: 9000
+        customRuntimeConfig:
+          command:
+            - /code/bootstrap
+      triggers:
+        - name: httpTrigger
+          type: http
+          config:
+            authType: anonymous
+            methods:
+              - GET
+      customDomains:
+        - domainName: auto
+          protocol: HTTP
+          routeConfigs:
+            - path: '/*'
+  golang1: 
+    component: fc 
+    actions: 
+      pre-deploy: 
+        - run: go mod tidy
+          path: ./golang1/code
+        - run: GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o target/main main.go
+          path: ./golang1/code
+    props:
+      region: ${vars.region} # 关于变量的使用方法，可以参考：https://www.serverless-devs.com/serverless-devs/yaml#变量赋值
+      service: ${vars.service}
+      function:
+        name: "start-fc-event-golang1x"
+        description: 'hello world by serverless devs'
+        runtime: go1
+        codeUri: ./golang1/code/target
+        handler: main
+        memorySize: 128
+        timeout: 60
