@@ -84,9 +84,9 @@ services:
       pre-deploy:
         - run: composer install
           path: ./start-fc-event-php7/code 
-        - run: if [ $(uname) == "Linux" ]; then apt-get update; fi;
+        - run: apt-get update
           path: ./start-fc-event-php7/code
-        - run: if [ $(uname) == "Linux" ]; then apt-get install -y git; fi;
+        - run: apt-get install -y git
           path: ./start-fc-event-php7/code
     props:
       region: ${vars.region} 
