@@ -1,5 +1,5 @@
 edition: 1.0.0
-name: web-framework-app
+name: app-build-test
 access: 'default'
 
 vars: 
