@@ -13,7 +13,7 @@ services:
     component: fc
     actions: 
       pre-deploy: 
-        - run curl -v https://docs.serverless-devs.com/cfc/readme
+        - run: curl -v https://docs.serverless-devs.com/cfc/readme
           path: ./
         - run: mvn package -DskipTests 
           path: ./start-springboot/code
