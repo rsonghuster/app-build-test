@@ -189,5 +189,5 @@ services:
         timeout: 60
         runtime: custom-container
         customContainerConfig:
-          image: "registry.cn-beijing.aliyuncs.com/xiliu-test/fc-node14:v1"
+          image: "registry.cn-beijing.aliyuncs.com/xiliu-test/fc-node14:v3"
         codeUri: ./custom-container-event-nodejs14/code
